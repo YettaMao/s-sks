@@ -3,7 +3,7 @@
 # Feb 19, 2007
 # Last run on 20141117
 
-$read_sac = "/home/zhl/work/sem/plot/read_sac";
+$read_sac = "/home/maoyt/work/sem/plot/read_sac";
 
 $sacxy = "sac.xy";
 $PS_file = "sks.ps";
@@ -26,6 +26,7 @@ $ang_offset = 0.;
 $plot_w = 0;
 $offset = 5;
 $prem_iaspi = 3 ;
+$norm = 0.3;
 
 `cp ../vel_gray.cpt ./`;
 
@@ -57,9 +58,9 @@ else {
 $plot_raw = 1;
 if($plot_raw==1){
    $pwd = `pwd`; chomp($pwd);
-   $plot_seg = "/home/zhl/work/s-sks/plot/plot_seg2.pl";
+   $plot_seg = "/home/maoyt/work/s-sks/plot/plot_seg2.pl";
    $comp1 = "r"; $comp2 = "t";
-   $rawdir = "/home/zhl/work/s-sks/ncisp6/data/raw/2007_289_21_05_41/";
+   $rawdir = "/home/maoyt/work/s-sks/ncisp6/data/raw/2007_289_21_05_41/";
    chdir $rawdir;
    print "Now plotting sks phases in $rawdir\n";
    print "perl $plot_seg $PS_file $comp1 $comp2\n";
@@ -70,7 +71,6 @@ if($plot_raw==1){
 else {@comp2  = ("u.xy","v.xy","w.xy");}
 
 if($offset > 0){
-
    for($cc=0; $cc<@comp;$cc++){
        $time_cut = 8;
        open(OO,">$comp2[$cc]");
@@ -98,9 +98,10 @@ if($offset > 0){
                    $n_sac = 0;
                }
                $segs[0] = $segs[0] - $sks_t + $prem_iaspi;
+               $segs[1] = ($segs[1] - $gcarc) * $norm + $gcarc ;
                if($gcarc < 84) {$time_cut = 6;}
                else {   $time_cut = 8;}
-#  after the 8 s, it is S
+# after the 8 s, it is S
                if($segs[0] >= $time_cut){
                   $goff= $gcarc - 82;
                   $segs[0] = $segs[0] + $goff * $offset_S + $goff * $goff * $offset_S_b;
@@ -173,11 +174,13 @@ $PORT       = "-P";
 $SCALE      = "$XLEN/$YLEN";
 $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
 $FSCALE     = "-F255/255/255";
-$BSCALE = "-B${xanot}/${yanot}WSne";
-$Line = "3/80/80/80";
+$BSCALE = "-Bwsne";
 $Line = "4/200/30/30";
+$Line = "200/30/30";
 $Liner = "3/200/60/60";
+$Liner = "200/60/60";
 $Time_line = "4/0/0/0t20_20:15";
+$Time_line = "0/0/0";
 
 $textsize = 15;
 $textangle = 0;
@@ -185,12 +188,12 @@ $x_offset = ($XMAX - $XMIN)/20;
 $y_offset = ($YMAX - $YMIN)/40;
 $x_overlap_offset = -$XLEN - 0.3;
 print "plotting , please wait ...\n";
-`gmtset ANNOT_FONT_SIZE_PRIMARY 10`;
+`gmt begin sks_syn ps`;
 for($ii =0; $ii< @comp; $ii++)
 {
    if($ii==0) {
-       if($plot_raw==0) {`psbasemap -JX$SCALE -R$RSCALE -K $PORT  -X$xshift -Y$yshift $BSCALE>$PS_file`;}
-       if($plot_raw==1) {`psbasemap -JX$SCALE -R$RSCALE -K -O $PORT -X$x_overlap_offset $BSCALE>>$PS_file`;}
+       if($plot_raw==0) {`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;}
+       if($plot_raw==1) {`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift -Bxa$xanot -Bya$yanot`;}
        &PSTEXT($XMAX + 5, $YMAX + 0.5 ,11, 0, 1, 10, "Time (s)",$PS_file);
        &PSTEXT($XMIN - 11.5, $YMIN +($YMAX - $YMIN)/2,11, 90, 1, 10, "Distance (\260)",$PS_file);
        &PSTEXT($XMIN - 9.5, $YMIN -($YMAX - $YMIN)/20,15, 0, 1, 10, "(b)",$PS_file);
@@ -198,18 +201,18 @@ for($ii =0; $ii< @comp; $ii++)
    else 
    {  
        $xshift = $XLEN+0.3; $yshift = 0.;
-       $BSCALE = "-B${xanot}/${yanot}wSne";
-       `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  -X$xshift -Y$yshift $BSCALE>>$PS_file`;
+       $BSCALE = "-Bwsne";
+       `gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;
    }
 
    print "Now is $title[$ii] ...\n";
 #   `psxy boundary.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W20/180/180/180 >> $PS_file`;
 
-   `psxy $comp2[$ii] -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$Line >> $PS_file`;
+   `gmt plot $comp2[$ii] -W1.2p,200/36/35,3_2_3_2-`;
    if($offset_S !=0.){
-#        `psxy $comp3[$ii] -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$Liner >> $PS_file`;
+#        `gmt plot $comp3[$ii] -W$Liner `;
    }
-   if($offset <=0) {`psxy time.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$Time_line >> $PS_file`;}
+   if($offset <=0) {`gmt plot time.of -W$Time_line `;}
 
    $y = $YMIN + $y_offset;
    &PSTEXT($XMIN+($XMAX-$XMIN)/20,$y ,8, $textangle, 3, 5, $title[$ii],$PS_file);
@@ -222,7 +225,6 @@ for($ii =0; $ii< @comp; $ii++)
       }
    }
 
-   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT $BSCALE>>$PS_file`;
 }
 
 #if($plot_raw == 1) {`rm @comp2 @comp3`;}
@@ -235,7 +237,7 @@ if($draw_model == 1) {
    $YMIN = 0;
    $YMAX = 300;
    $velm = "vel.xy";
-   $output_vd = 1; # if output of velocity model is of the difference between (c44-c55)/(c44+c55)/2
+   $output_vd = 0; # if output of velocity model is of the difference between (c44-c55)/(c44+c55)/2
 
    &create_model("semmodel",2,"zone1.xy",$x_o,0);
    &model_layers("semmodel",$x_o);
@@ -251,7 +253,7 @@ if($draw_model == 1) {
    $SCALE  = "$XLEN/$YLEN";
    $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
    $FSCALE = "-F255/255/255";
-   $BSCALE = "-B${xanot}/${yanot}WSne";
+   $BSCALE = "-BWSne";
 
    $B= $BSCALE;
    $Rslice="-R$XMIN/$XMAX/$YMIN/$YMAX";
@@ -263,25 +265,24 @@ if($draw_model == 1) {
 
     if($output_vd == 1){
       $cmax = 0.1;
-      open(SVC,"|/home/zhl/work/tomo/software/x/svcpt13_table_cont_zhl");
+      open(SVC,"|/home/maoyt/work/tomo/software/x/svcpt13_table_cont_zhl");
       print SVC "-$cmax $cmax\n";
       close(SVC);
       `mv svel13.cpt $CPT`;
     }
+   `gmt surface $velm -Gvelm.grd -R$RSCALE -I0.01/0.1 -T0.25 `;
+   `gmt grdimage velm.grd -X$xshift -Y$yshift -JX$SCALE -R$RSCALE -C$CPT `;
 
-   `surface $velm -Gvelm.grd -R$RSCALE -I0.01/0.1 -T0.25 -V`;
-   `grdimage velm.grd -X$xshift -Y$yshift -JX$SCALE -R$RSCALE -C$CPT  -K -O >> $PS_file`;
+#   `gmt basemap -JX$SCALE -R$RSCALE $BSCALE `;
+   `gmt plot layers.xy -JX$SCALE -R$RSCALE -W200/200/200 `;
 
-#   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  $BSCALE >>$PS_file`;
-   `psxy layers.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W5/200/200/200  >> $PS_file`;
-
-#   `psxy $int_model -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W5/200/0/0  >> $PS_file`;
+#   `gmt plot $int_model -JX$SCALE -R$RSCALE -W200/0/0 `;
 
    &PSTEXT($XMIN -($XMAX-$XMIN)/8 , $YMIN + ($YMAX - $YMIN) /2 ,11, 90, 1, 10, "Depth (km)",$PS_file);
    &PSTEXT($XMIN+($XMAX-$XMIN)/2 ,$YMAX + ($YMAX-$YMIN)/3,11, 0, 1, 10, "Distance (\260)",$PS_file);
    &PSTEXT($XMIN -1.3 , $YMIN - ($YMAX - $YMIN) /7 ,15, 0, 1, 10, "(a)",$PS_file);
 
-   `psxy arrow.xy -JX$SCALE -R$RSCALE  -N -K -O $PORT -SV0.1c/0.2c/0.13c -G100/100/100 >> $PS_file`;
+   `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100`;
 
    open(RC,"receiver.xy");
    $nl=<RC>; chomp($nl);
@@ -295,129 +296,12 @@ if($draw_model == 1) {
    close(SS);
    close(RC);
 
-   `psxy sta.xy -JX$SCALE -R$RSCALE  -N -K -O $PORT -Si0.15 -G0/0/0 >> $PS_file`;
-#   `psxy arrow.xy -JX$SCALE -R$RSCALE  -N -K -O $PORT -SV0.1c/0.2c/0.13c -G100/100/100 >> $PS_file`;
-   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  $BSCALE >>$PS_file`;
+   `gmt plot sta.xy -Si0.15 -G0/0/0 `;
+#   `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100 `;
 }
+`gmt end `;
+`gmt psconvert sks_syn.ps -Mbsks.ps -Tf -Fsks_com`;
 
-# -------------------------------------------------------
-# draw split parameters
-$plot_sws = 0;
-$plot_error = 1;
-$raw_split = "/home/zhl/work/aniso/data/sc_result";
-#$raw_split = "/home/zhl/work/aniso/data/sc/1998.361.00.txt";
-$plot_sc_error = 1;
-$res_file = "split_par.txt";
-
-if($plot_sws){
-   print "Plotting split parameters\n";
-   &plot_split($res_file);
-}
-
-sub plot_split{
-   my($res_file) = @_;
-
-   $yshift = -18.5;
-   $yanot  = 30;
-   $xanot  = 1;
-
-   $YMIN = 999; $YMAX = -999;
-   $XMIN = 999; $XMAX = -999;
-
-   $XMIN = 999; $XMAX = 0;
-
-   open(SS,"$res_file");
-   $num = 0;
-   while($line = <SS>){
-      chomp($line);
-      @segs = split(/ +/,$line);
-      $name[$num]  = $segs[0];
-      $gcarc[$num] = $segs[1];
-      $gcarcs[$num]= $segs[1];
-      $phi[$num]   = $segs[2];
-      $dphi[$num]  = $segs[3];
-      $dt[$num]    = $segs[4];
-      $ddt[$num]   = $segs[5];
-      if($XMIN > $gcarc[$num]) {$XMIN = $gcarc[$num]}
-      if($XMAX < $gcarc[$num]) {$XMAX = $gcarc[$num]}
-#   print "gcarc = $gcarc[$num]\n";
-      $num ++;
-   }
-   close(SS);
-
-# ------------- phi: fast polarization -------------------------------------
-   $XMIN -=0.5; $XMAX +=0.2;
-   $YMIN = 60;  $YMAX = 180;
-   $YLEN   = 4.5;
-   $XLEN   = 5.2;
-   print "$XMIN $XMAX $YMIN $YMAX\n";
-
-   $PORT       = "-P"; 
-   $SCALE      = "$XLEN/$YLEN";
-   $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
-   $FSCALE     = "-F255/255/255";
-   $BSCALE = "-B${xanot}/${yanot}WSne";
-   $Line = "3/30/30/30";
-
-   `psbasemap -JX$SCALE -R$RSCALE -K $PORT -O -Y$yshift $BSCALE>>$PS_file`;
-   &PSTEXT($XMIN+($XMAX-$XMIN)/2,$YMIN - ($YMAX - $YMIN)/4.5 ,10, 0, 1, 10, "Distance (\260)",$PS_file);
-   &PSTEXT($XMIN-($XMAX-$XMIN)/4.,$YMIN +($YMAX - $YMIN)/2 ,10, 90, 1, 10, "\370 (\260)",$PS_file);
-
-   &PSTEXT($XMIN-($XMAX-$XMIN)/4.2,$YMAX +($YMAX - $YMIN)/20 ,16, 0, 1, 10, "(c)",$PS_file);
-
-# Plot PFF
-#   $PFF_line = "10/200/200/200";
-#   &PlotBNS($PFF);
-#   `psxy temp.xy  -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$PFF_line  >> $PS_file`;
-
-   &read_sws($res_file,1);
-   `psxy line.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$Line  >> $PS_file`;
-   `psxy dot.xy  -JX$SCALE  -R$RSCALE  -N -K -O $PORT -W$Line -Sc0.1  >> $PS_file`;
-
-#   &read_sc($raw_split,1);
-#   $fill = "0/128/255";
-#   $sc_line = "1/$fill";
-
-#   `psxy line2.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$sc_line  >> $PS_file`;
-#   `psxy dot2.xy  -JX$SCALE  -R$RSCALE  -N -K -O $PORT -W$sc_line -Ss0.11 -G$fill >> $PS_file`;
-
-# -------------- dt: delay time   -----------------------------------------
-   $YMIN = 0;  $YMAX = 3.2;
-
-   print "$XMIN $XMAX $YMIN $YMAX\n";
-   $yanot  = 1;
-   $xanot  = 1;
-   $xshift = $XLEN*1.3;
-
-   $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
-   $BSCALE = "-B${xanot}/${yanot}WSne";
-   `psbasemap -JX$SCALE -R$RSCALE -K $PORT -O -X$xshift $BSCALE >> $PS_file`;
-   &PSTEXT($XMIN+($XMAX-$XMIN)/2,$YMIN - ($YMAX - $YMIN)/4.5 ,10, 0, 1, 10, "Distance (\260)",$PS_file);
-   &PSTEXT($XMIN-($XMAX-$XMIN)/5.5,$YMIN +($YMAX - $YMIN)/2 ,10, 90, 1, 10, "time (s)",$PS_file);
-
-   # Plot PFF
- #  &PlotBNS($PFF);
- #  `psxy temp.xy  -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$PFF_line  >> $PS_file`;
-
-   #&read_sws($res_file,1);
-   &read_sws($res_file,0);
-   `psxy line.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$Line  >> $PS_file`;
-   `psxy dot.xy  -JX$SCALE  -R$RSCALE  -N -K -O $PORT -W$Line -Sc0.1  >> $PS_file`;
-
-#   &read_sc($raw_split,0);
-#   `psxy line2.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$sc_line  >> $PS_file`;
-#   `psxy dot2.xy  -JX$SCALE  -R$RSCALE  -N -K -O $PORT -W$sc_line -Ss0.11 -G$fill >> $PS_file`;
-#   `psbasemap -JX -R -O $PORT  -B >> $PS_file`;
-}
-
-sub PlotBNS{
-   my($xp) = @_;
-   open(BB, ">temp.xy");
-   print BB ">\n";
-   print BB "$xp $YMAX\n";
-   print BB "$xp $YMIN\n";
-   close(BB);
-}
 
 sub read_sc{
    my($file,$degree) = @_;
@@ -548,8 +432,8 @@ sub fabs{
 
 sub PSTEXT{
     my($xx, $yy,$textsize, $textangle, $textfont, $just, $text, $ps) = @_;
-    open(GMT,"| pstext -R$RSCALE -K -O -N -JX$SCALE >> $ps");
-        print GMT "$xx $yy $textsize $textangle $textfont $just $text\n";
+    open(GMT,"| gmt text -R$RSCALE -F+f+a+j");
+        print GMT "$xx $yy $textsize,$textfont $textangle $just $text\n";
     close(GMT);
 }
 

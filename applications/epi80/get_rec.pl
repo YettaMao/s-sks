@@ -1,9 +1,9 @@
 # perl script for obtaining receiver's positions
 
-$record = "/home/zhl/work/s-sks/ncisp6/data/raw/2008_201_22_39_50/";
+$record = "/home/maoyt/work/s-sks/ncisp6/data/raw/2008_201_22_39_50/";
 $rec = "receiver.xy";
 $sta = "sta_name";
-$xmin=8685; # km must be consistent with that in run.par
+$xmin=8510.34; # km must be consistent with that in run.par
 $degree_to_km = 6371*3.14159265358979/180.; 
 $change_to_km = 1;
 
@@ -17,7 +17,7 @@ $num = @bhn;
 # calculating gcarc
 for($ii=0;$ii<@bhn;$ii++){
    $sac = $bhn[$ii]; chomp($sac);
-   $gcarc = `saclst gcarc <$sac`; chomp($gcarc);
+   my($sac,$gcarc) = split /\s+/, `saclst gcarc f $sac`; 
    $rec[$ii] = $gcarc;
    @segs = split(/\./,$sac); 
    $name[$ii] =$segs[0]; 

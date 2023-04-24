@@ -24,7 +24,8 @@ $stronger = 1.3; # enlarge at 1 direction (x)
 #@rhos=(2.0);
 
 @vps =(8.10);
-@vss =(4.73);
+#@vss =(4.73);
+@vss =(4.48);
 @rhos=(3.2);
 
 $TI = "any.ela";
@@ -32,7 +33,7 @@ $TI = "any.ela";
 $rot = "/home/maoyt/work/rf/semsyn/model/src/elastic_rotate";
 $new_model = "newany.ela";
 
-$angle_100 = 5; # fast polarization direction wrt north 
+$angle_100 = 175; # fast polarization direction wrt north 
 $sem = "sem_".$angle_100;
 
 $work = ` pwd`; chomp($work);

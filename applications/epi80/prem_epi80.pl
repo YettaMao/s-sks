@@ -1,15 +1,14 @@
 # perl script for runing SEM programs
 
-$homedir= "/home/zhl/work/s-sks/";
-#$pgsdir = "/home/zhl/work/rf/semsyn";
-$pgsdir = "$homedir/semsyn";# 20211101 Mao,cannot find execute files from original path
+$homedir= "/home/maoyt/work/s-sks/";
+$pgsdir = "/home/maoyt/work/s-sks/semsyn";
 
 $psv    = "$pgsdir/bin/aserpsv_sem";
 $sh     = "$pgsdir/bin/asersh_sem";
 $demult = "$pgsdir/bin/demult";
 $demult_sh = "$pgsdir/bin/demult_sh";
 $sem       = "$pgsdir/bin/sem2d_psvsh";
-#$sem       = "$pgsdir/bin/sem2d";
+#$sem      = "$pgsdir/bin/sem2d";
 
 $plotdir = "$homedir/plot";
 $Plot_GRT_Directly= "$plotdir/Plot_grt_directly.pl";
@@ -20,8 +19,8 @@ $plot_grt_sh = "$plotdir/Plot_GRT_sh.pl";
 
 $par    = "run.par";
 
-$GRT = 1;
-$GRT_SH = 1;
+$GRT = 0;
+$GRT_SH = 0;
 $plot_result = 1;
 $evdp = 384;
 $phase = "SKS";
@@ -36,7 +35,7 @@ $Tosac   = "$plotdir/uvw2sac";
 $sac_plot= "$plotdir/sac_plot";
 $plot_uvw = "plot_uvw_sks.pl";
 $trace   = 45;
-$cal_split="/home/zhl/work/s-sks/applications/epi80/cal_split.pl";
+$cal_split="/home/maoyt/work/s-sks/applications/epi80/cal_split.pl";
 
 # step 0: GRT calculations
 if($GRT){
@@ -113,9 +112,10 @@ if($plot_result == 1){
     }
 }
 
+`perl plot_sks.pl`;
 #4
 print "Call cal_split.pl\n";
-`perl $cal_split`;
+#`perl $cal_split`;
 $remove_pro_files=1;
 if($remove_pro_files == 1){
     `rm *.er  *.fa  *.fi  *.log  *.pma  *.pmi  *.sa  *.si `;

@@ -1,7 +1,7 @@
 # perl script for runing SEM programs
 
-$homedir= "/home/zhl/work/s-sks/";
-$pgsdir = "/home/zhl/work/s-sks/semsyn";
+$homedir= "/home/maoyt/work/s-sks/";
+$pgsdir = "/home/maoyt/work/s-sks/semsyn";
 
 $psv    = "$pgsdir/bin/aserpsv_sem";
 $sh     = "$pgsdir/bin/asersh_sem";
@@ -19,8 +19,8 @@ $plot_grt_sh = "$plotdir/Plot_GRT_sh.pl";
 
 $par    = "run.par";
 
-$GRT = 1;
-$GRT_SH = 1;
+$GRT = 0;
+$GRT_SH = 0;
 $plot_result = 1;
 $evdp = 492;
 $phase = "SKS";
@@ -35,7 +35,7 @@ $Tosac   = "$plotdir/uvw2sac";
 $sac_plot= "$plotdir/sac_plot";
 $plot_uvw = "plot_uvw_sks.pl";
 $trace   = 52;
-$cal_split="/home/zhl/work/s-sks/applications/epi83/cal_split.pl";
+$cal_split="/home/maoyt/work/s-sks/applications/epi83/cal_split.pl";
 
 # step 0: GRT calculations
 if($GRT){
@@ -112,10 +112,10 @@ if($plot_result == 1){
     }
 }
 
-`perl plot_sks2.pl`;
+`perl plot_sks.pl`;
 #4
 print "Call cal_split.pl\n";
-`perl $cal_split`;
+#`perl $cal_split`;
 $remove_pro_files=1;
 if($remove_pro_files == 1){
     `rm *.er  *.fa  *.fi  *.log  *.pma  *.pmi  *.sa  *.si `;

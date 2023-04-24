@@ -113,22 +113,24 @@ $PORT       = "-P";
 $SCALE      = "$XLEN/$YLEN";
 $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
 $FSCALE     = "-F255/255/255";
-$BSCALE = "-B${xanot}/${yanot}WSne";
+$BSCALE = "-BWSne";
 $Line = "3/80/80/250";
+$Line = "80/80/250";
 $Time_line  = "4/0/0/0t20_20:15";
 $STime_line = "4/0/0/255t20_20:15";
+$Time_line  = "0/0/0";
+$STime_line = "0/0/255";
 
 $textsize = 15;
 $textangle = 0;
 $x_offset = ($XMAX - $XMIN)/20;
 $y_offset = ($YMAX - $YMIN)/40;
 print "plotting , please wait ...\n";
-`gmtset ANNOT_FONT_SIZE_PRIMARY 10`;
-`gmtset MEASURE_UNIT cm`;
+`gmt begin Fig ps`;
 for($ii =0; $ii< @comp; $ii++)
 {
    if($ii==0) {
-         `psbasemap -JX$SCALE -R$RSCALE -K $PORT  -X$xshift -Y$yshift $BSCALE>$PS_file`;
+         `gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;
           &PSTEXT($XMAX + 40, $YMAX + $y_offset*2.5 ,10, 0, 1, 10, "Time (s)",$PS_file);
           &PSTEXT($XMIN - 6.5* $x_offset, $YMIN +($YMAX - $YMIN)/2,10, 90, 1, 10, "Distance (\260)",$PS_file);
        #   &PSTEXT($XMIN - 3.5* $x_offset, $YMIN -($YMAX - $YMIN)/20,17, 0, 1, 10, "(b)",$PS_file);#maoyt comment
@@ -140,31 +142,30 @@ for($ii =0; $ii< @comp; $ii++)
             $xshift = "5.3c"
        }
 
-       $BSCALE = "-B${xanot}/${yanot}wSne";
-       `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  -X$xshift -Y$yshift $BSCALE>>$PS_file`;
+       $BSCALE = "-BwSne";
+       `gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;
    }
-
    print "Now is $title[$ii] ...\n";
 
-   `psxy $comp[$ii] -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$Line >> $PS_file`;
+   `gmt plot $comp[$ii] -W$Line`;
    if($offset <=0) {
-       `psxy time.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$Time_line >> $PS_file`;
-       `psxy stime.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$STime_line >> $PS_file`;
+       `gmt plot time.of -N -W$Time_line `;
+       `gmt stime.of -N  -W$STime_line`;
    }
 
    $y = $YMIN + $y_offset*0.6;
    &PSTEXT($XMIN+($XMAX-$XMIN)/2,$y ,9, $textangle, 1, 10, $title[$ii],$PS_file);
 
-   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT $BSCALE>>$PS_file`;
+   `gmt basemap $BSCALE`;
 }
-
+`gmt end show`;
 #`gs $PS_file`;
 
 
 sub PSTEXT{
     my($xx, $yy,$textsize, $textangle, $textfont, $just, $text, $ps) = @_;
-    open(GMT,"| pstext -R$RSCALE -K -O -N -JX$SCALE >> $ps");
-        print GMT "$xx $yy $textsize $textangle $textfont $just $text\n";
+    open(GMT,"| gmt text -R$RSCALE -N -F+f+a+j ");
+        print GMT "$xx $yy $textsize,$textfont $textangle $just $text\n";
     close(GMT);
 }
 
