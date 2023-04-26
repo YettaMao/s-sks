@@ -8,11 +8,11 @@ $read_sac = "/home/maoyt/work/sem/plot/read_sac";
 $sacxy = "sac.xy";
 $PS_file = "sks.ps";
 $draw_model = 1;
-$x_o = 8510.34;
+$x_o = 9232.72;
 $boundary = 104.8;
 $top = 446.2710; # based upon semmodel after flatterning
 $PFF = ($x_o+462)/111.2; #degree
-$sta_num = 52;
+$sta_num = 54;
 $pi = 3.14159265;
 $deg = 6371*$pi/180.;
 
@@ -26,7 +26,7 @@ $ang_offset = 0.;
 $plot_w = 0;
 $offset = 5;
 $prem_iaspi = 8 ;
-$norm = 0.7;
+$norm = 0.2;
 
 `cp ../vel_gray.cpt ./`;
 
@@ -60,7 +60,7 @@ if($plot_raw==1){
    $pwd = `pwd`; chomp($pwd);
    $plot_seg = "/home/maoyt/work/s-sks/plot/plot_seg2.pl";
    $comp1 = "r"; $comp2 = "t";
-   $rawdir = "/home/maoyt/work/s-sks/ncisp6/data/raw/2008_201_22_39_50/";
+   $rawdir = "/home/maoyt/work/s-sks/ncisp6/data/raw/2007_343_07_28_20/";
    chdir $rawdir;
    print "Now plotting sks phases in $rawdir\n";
    print "perl $plot_seg $PS_file $comp1 $comp2\n";
@@ -99,8 +99,8 @@ if($offset > 0){
                $segs[0] = $segs[0] - $sks_t + $prem_iaspi;
                $segs[1] = ($segs[1] - $gcarc) * $norm + $gcarc ;
                if($gcarc < 83) {$time_cut = -15;}
-	       elsif(($gcarc>=83)&&($gcarc<84)){$time_cut = 8;}
-               else {   $time_cut = 11;}
+	       elsif(($gcarc>=83)&&($gcarc<84)){$time_cut = 6;}
+               else {   $time_cut = 8;}
 # after the 8 s, it is S
                if($segs[0] >= $time_cut){
                   $goff= $gcarc - 80;

@@ -158,7 +158,7 @@ for($ii =0; $ii< @comp; $ii++)
 
    `gmt basemap $BSCALE`;
 }
-`gmt end show`;
+`gmt end`;
 #`gs $PS_file`;
 
 
@@ -171,19 +171,15 @@ sub PSTEXT{
 
 sub sks_tab{
    my($gcarc) = @_;
-   open(TT,"tcurve.out");
+   open(TT,"taup_curve.gmt");
    $l = <TT>; chomp($l);
    @seg = split(" ",$l);
-   for($kk=0; $kk<@seg; $kk++){
-       if($seg[$kk] =~/^SKSac$/) {$col = $kk;};
-   }
-#   print "sks at $col column\n";
    $num = 0;
    while($l=<TT>){
       chomp($l);
       @seg = split(" ",$l);
       $g[$num] = $seg[0];
-      $sks[$num] = $seg[$col];
+      $sks[$num] = $seg[1];
 #      print "$g[$num] $sks[$num]\n";
       $num ++;
    }
@@ -198,19 +194,15 @@ sub sks_tab{
 
 sub S_tab{
    my($gcarc) = @_;
-   open(TT,"tcurve.out");
+   open(TT,"taup_curve_S.gmt");
    $l = <TT>; chomp($l);
    @seg = split(" ",$l);
-   for($kk=0; $kk<@seg; $kk++){
-       if($seg[$kk] =~/^S$/) {$col = $kk;};
-   }
-#   print "sks at $col column\n";
    $num = 0;
    while($l=<TT>){
       chomp($l);
       @seg = split(" ",$l);
       $g[$num] = $seg[0];
-      $sks[$num] = $seg[$col];
+      $sks[$num] = $seg[1];
 #      print "$g[$num] $sks[$num]\n";
       $num ++;
    }

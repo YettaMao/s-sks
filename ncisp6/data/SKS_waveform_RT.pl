@@ -3,8 +3,8 @@
 
 @ARGV == 3 || die "Usage: $0 DIR WF_C PS_FILE\n";
 my($DIR, $WF, $PS_file) = @ARGV;
-$ne2rt = "/home/zhl/work/aniso/sws/local/PlotPl/NE2RT.pl";
-$WFT   = "/home/zhl/work/aniso/sws/local/bin/waveform_scale";
+$ne2rt = "/home/maoyt/work/aniso/sws/local/PlotPl/NE2RT.pl";
+$WFT   = "/home/maoyt/work/aniso/sws/local/bin/waveform_scale";
 
 $temp = "temp.txt";
 
@@ -36,17 +36,10 @@ $SACFILE = $R_FILES[0];
 chomp($SACFILE);
 
 print "the sacfile is $SACFILE \n";
-$sdepth = `saclst evdp <$SACFILE`; chomp($sdepth);
+my($SACFILE,$sdepth,$nzyear,$nzjday,$nzhour,$nzmin,$nzsec) = split/\s+/,`saclst evdp nzyear nzjday nzhour nzmin nzsec f $SACFILE`;
 if($sdepth>600) {$sdepth /=1000;}
-$nzyear = `saclst nzyear <$SACFILE`; chomp($nzyear);
-$nzjday = `saclst nzjday <$SACFILE`; chomp($nzjday);
-$nzhour = `saclst nzhour <$SACFILE`; chomp($nzhour);
-$nzmin  = `saclst nzmin <$SACFILE`; chomp($nzmin);
-$nzsec  = `saclst nzsec <$SACFILE`; chomp($nzsec);
 
-$gcarc = `saclst gcarc < $SACFILE`; chomp($gcarc);
-$baz  = `saclst baz < $SACFILE`; chomp($baz);
-
+my($SACFILE,$gcarc,$baz) = split/\s+/,`saclst gcarc baz f $SACFILE`; 
 print "$nzyear $nzjday $nzhour  \n";
 
 $min_g = 180;
@@ -54,14 +47,16 @@ $max_g = 0.;
 for($i=0; $i<@R_FILES; $i++)
 {
    $SACFILE = $R_FILES[$i];chomp($SACFILE);
-   $gcarc[$i] = `saclst gcarc < $SACFILE`; chomp($gcarc[$i]);
+   my($SACFILE,$gca) = split/\s+/,`saclst gcarc f $SACFILE`; 
+   $gcarc[$i]=$gca;
    if($gcarc[$i] > $max_g) {$max_g = $gcarc[$i];}
    if($gcarc[$i] < $min_g) {$min_g = $gcarc[$i];}   
 }
 for($i=0; $i<@T_FILES; $i++)
 {
    $SACFILE = $T_FILES[$i];chomp($SACFILE);
-   $gcarc_n[$i] = `saclst gcarc < $SACFILE`; chomp($gcarc_n[$i]);
+   my($SACFILE,$gca_n) = split/\s+/,`saclst gcarc f $SACFILE`; 
+   $gcarc_n[$i]=$gca_n;
    if($gcarc_n[$i] > $max_g) {$max_g = $gcarc_n[$i];}
    if($gcarc_n[$i] < $min_g) {$min_g = $gcarc_n[$i];}   
 }
@@ -78,19 +73,19 @@ print TL "0. $YMIN\n";
 print TL "0. $YMAX\n";
 close(TL);
 
-$xshift  = 1.1;
+$xshift  = 3.1;
 $yshift  = 2;
 $yanot   = 1;
 $xanot   = 15;
 
-$YLEN       = -8.0;
-$XLEN       = 2.6;
+$YLEN       = -15.0;
+$XLEN       = 6;
 
 $PORT       = "-P"; 
 $SCALE      = "$XLEN/$YLEN";
 $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
 $FSCALE     = "-F255/255/255";
-$BSCALE = "-B${xanot}/${yanot}WSne";
+$BSCALE = "-BWSne";
 
 # calculate time curves
 if($caltime =~ /yes/)
@@ -157,15 +152,17 @@ if($caltime =~ /yes/)
 }
 
 `gmtset MEASURE_UNIT inch`;
+#`gmt begin $PS_file ps`;
+`gmt begin sks_test ps`;
 # ---- plot R components first -----
 $textsize  = 13;
 $textangle = 0;
 $x_offset = ($XMAX - $XMIN)/12;
 $y_offset = ($YMAX - $YMIN)/12;
 print "plot R component first, please wait ...\n";
-`psbasemap -JX$SCALE -R$RSCALE -K $PORT  -X$xshift -Y$yshift $BSCALE>$PS_file`;
-`psxy time.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W2/90/90/90 >> $PS_file`;
-`psxy $phase2.of -M -JX$SCALE -R$RSCALE  -N -K -O $PORT -W2/100/100/100 >> $PS_file`;
+`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;
+`gmt plot time.of -JX$SCALE -R$RSCALE  -N  -W90/90/90 `;
+`gmt plot $phase2.of -JX$SCALE -R$RSCALE  -N -W100/100/100 `;
 
 $y = $YMIN - $y_offset;
 if($nzjday<10) {$nzjday = "00".$nzjday;}
@@ -192,62 +189,63 @@ $x = $ph2_time[$YMIN_int]; $y = $YMIN + $y_offset/8;
 $textsize = 8;
 for($i=0; $i<@R_FILES; $i++)
 {
-    $Line = "5/0/0/0";
+    $Line = "0/0/0";
     $SACFILE = $R_FILES[$i];chomp($SACFILE);
     @tsegs = split(/_/,$SACFILE); 
     $sta_name = substr($tsegs[1],0,3);
     $B_time = $a_times[$i] - $X_O;
     $E_time = $B_time + ($XMAX -$XMIN);
     @name = split(/\./,$SACFILE);
-    $long = `saclst kstnm < $SACFILE`; chomp($long);
+    my($SACFILE,$long) = split/\s+/,`saclst kstnm f $SACFILE`; 
     @sta_name = split(/\./,$long);
     system("$WF $SACFILE $B_time $E_time $XMIN $YMAX $XMAX $YMIN 1 $temp ");
     open(TT,"scale.tmp");
     $unit_r[$i] = <TT>; chomp($unit_r[$i]);
 #    print "No.$i scale = $unit_r[$i]\n";
     close(TT);
-    `psxy $temp -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$Line >> $PS_file`;
+    `gmt plot $temp -JX$SCALE -R$RSCALE  -N -W$Line `;
 #    &PSTEXT($XMAX + $x_offset, $gcarc[$i],$textsize, $textangle, 1, 10, $sta_name,$PS_file);
 }
 
 # ---- plot T components next -----
 print "\n plot T component first, please wait ...\n";
 
-$BSCALE = "-B${xanot}/${yanot}wSne";
+$BSCALE = "-BwSne";
 $xshift = $XLEN*1.12;
 
-`psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  -X$xshift  $BSCALE>>$PS_file`;
-`psxy time.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W2/90/90/90 >> $PS_file`;
-`psxy $phase2.of -M -JX$SCALE -R$RSCALE  -N -K -O $PORT -W2/100/100/100 >> $PS_file`;
+`gmt basemap -JX$SCALE -R$RSCALE -X$xshift  $BSCALE -Bxa$xanot -Bya$yanot`;
+`gmt plot time.of -JX$SCALE -R$RSCALE  -N -W90/90/90 `;
+`gmt plot $phase2.of -JX$SCALE -R$RSCALE  -N -W100/100/100`;
 &PSTEXT($XMIN +($XMAX-$XMIN)/20,$YMIN+($YMAX-$YMIN)/50,9, 0, 3, 5, "Tangential",$PS_file);
 $x = $ph2_time[$YMIN_int]; $y = $YMIN + $y_offset/8;
 &PSTEXT($x,$y ,8, $textangle, 3, 5, $phase2,$PS_file);
 
 for($i=0; $i<@T_FILES; $i++)
 {
-    $Line = "5/0/0/0";
+    $Line = "0/0/0";
     $SACFILE = $T_FILES[$i];chomp($SACFILE);
     @tsegs = split(/_/,$SACFILE); 
     $sta_name = substr($tsegs[1],0,5);
     $B_time = $a_times_n[$i] - $X_O;
     $E_time = $B_time + ($XMAX -$XMIN);
     @name = split(/\./,$SACFILE);
-    $long = `saclst kstnm < $SACFILE`; chomp($long);
+    my($SACFILE,$long) = split/\s+/,`saclst kstnm f $SACFILE`; 
     @sta_name = split(/\./,$long);
-#    system("$WF $SACFILE $B_time $E_time $XMIN $YMAX $XMAX $YMIN 1 $temp ");
+    #system("$WF $SACFILE $B_time $E_time $XMIN $YMAX $XMAX $YMIN 1 $temp ");
     $scale = $unit_r[$i];
     #print "No.$i, $scale1\n";
     # waveform begin_time end_time infile l_b.x r_t.x height filename
     system("$WFT $SACFILE $B_time $E_time $XMIN $XMAX $scale $temp ");
 
-    `psxy $temp -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$Line >> $PS_file`;
+    `gmt plot $temp -JX$SCALE -R$RSCALE  -N -W$Line`;
     &PSTEXT($XMAX + $x_offset, $gcarc[$i],8, $textangle, 1, 10, $sta_name[0],$PS_file);
 }
 
-`psbasemap -JX$SCALE -R$RSCALE -O $PORT  $BSCALE>>$PS_file`;
+`gmt basemap -JX$SCALE -R$RSCALE $BSCALE`;
+`gmt end`;
 `rm $temp`;
 chdir $DIR;
-`rm *.BHR *.BHT`;
+#`rm *.BHR *.BHT`;
 chdir $Old_dir;
 
 
@@ -290,7 +288,7 @@ sub timecurves{
 
 sub PSTEXT{
     my($xx, $yy,$textsize, $textangle, $textfont, $just, $text, $ps) = @_;
-    open(GMT,"| pstext -R$RSCALE -K -O -N -JX$SCALE >> $ps");
-        print GMT "$xx $yy $textsize $textangle $textfont $just $text\n";
+    open(GMT,"| gmt text -N -F+f+a+j ");
+        print GMT "$xx $yy $textsize,$textfont $textangle $just $text\n";
     close(GMT);
 }

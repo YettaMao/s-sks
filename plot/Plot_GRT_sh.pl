@@ -134,7 +134,7 @@ for($ii =0; $ii< @comp; $ii++)
        &PSTEXT($XMIN+($XMAX-$XMIN)/2,$y ,$textsize, $textangle, 1, 10, $title[$ii],$PS_file);
    }
 }
-`gmt end show`;
+`gmt end `;
 
 sub PSTEXT{
     my($xx, $yy,$textsize, $textangle, $textfont, $just, $text, $ps) = @_;

@@ -94,7 +94,7 @@ if($offset > 0){
             else{
                if($segs[0] >500 && $n_sac == 1) {
                    $sks_t = &sks_tab($gcarc);
-#                   print "gcarc=$gcarc $segs[0] - $sks_t ,amp=$segs[1]\n";
+		   #    print "gcarc=$gcarc $segs[0] - $sks_t ,amp=$segs[1]\n";
                    $n_sac = 0;
                }
                $segs[0] = $segs[0] - $sks_t + $prem_iaspi;
@@ -192,8 +192,8 @@ print "plotting , please wait ...\n";
 for($ii =0; $ii< @comp; $ii++)
 {
    if($ii==0) {
-       if($plot_raw==0) {`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;}
-       if($plot_raw==1) {`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift -Bxa$xanot -Bya$yanot`;}
+       if($plot_raw==0) {`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift -Bxa$xanot -Bya$yanot`;}
+       if($plot_raw==1) {`gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE`;}
        &PSTEXT($XMAX + 5, $YMAX + 0.5 ,11, 0, 1, 10, "Time (s)",$PS_file);
        &PSTEXT($XMIN - 11.5, $YMIN +($YMAX - $YMIN)/2,11, 90, 1, 10, "Distance (\260)",$PS_file);
        &PSTEXT($XMIN - 9.5, $YMIN -($YMAX - $YMIN)/20,15, 0, 1, 10, "(b)",$PS_file);
@@ -215,13 +215,13 @@ for($ii =0; $ii< @comp; $ii++)
    if($offset <=0) {`gmt plot time.of -W$Time_line `;}
 
    $y = $YMIN + $y_offset;
-   &PSTEXT($XMIN+($XMAX-$XMIN)/20,$y ,8, $textangle, 3, 5, $title[$ii],$PS_file);
+      &PSTEXT($XMIN+($XMAX-$XMIN)/20,$y ,8, $textangle, 3, 5, $title[$ii],$PS_file);
 
    if($ii==1){
       for($nj=0; $nj<@name;$nj++){
           $nx = $XMAX + ($XMAX-$XMIN)/10;
           $ny = $gcarcs[$nj];
-          &PSTEXT($nx,$ny ,8, 0, 1, 10, $name[$nj],$PS_file);
+	  # &PSTEXT($nx,$ny ,8, 0, 1, 10, $name[$nj],$PS_file);
       }
    }
 
@@ -273,7 +273,7 @@ if($draw_model == 1) {
    `gmt surface $velm -Gvelm.grd -R$RSCALE -I0.01/0.1 -T0.25 `;
    `gmt grdimage velm.grd -X$xshift -Y$yshift -JX$SCALE -R$RSCALE -C$CPT `;
 
-#   `gmt basemap -JX$SCALE -R$RSCALE $BSCALE `;
+   `gmt basemap -JX$SCALE -R$RSCALE $BSCALE -Bxa$xanot -Bya$yanot`;
    `gmt plot layers.xy -JX$SCALE -R$RSCALE -W200/200/200 `;
 
 #   `gmt plot $int_model -JX$SCALE -R$RSCALE -W200/0/0 `;
@@ -282,7 +282,7 @@ if($draw_model == 1) {
    &PSTEXT($XMIN+($XMAX-$XMIN)/2 ,$YMAX + ($YMAX-$YMIN)/3,11, 0, 1, 10, "Distance (\260)",$PS_file);
    &PSTEXT($XMIN -1.3 , $YMIN - ($YMAX - $YMIN) /7 ,15, 0, 1, 10, "(a)",$PS_file);
 
-   `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100`;
+   #  `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100`;
 
    open(RC,"receiver.xy");
    $nl=<RC>; chomp($nl);
@@ -295,11 +295,11 @@ if($draw_model == 1) {
    }
    close(SS);
    close(RC);
+   `gmt plot sta.xy -N -Si0.15c -Gblack`;
 
-   `gmt plot sta.xy -Si0.15 -G0/0/0 `;
 #   `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100 `;
 }
-`gmt end `;
+`gmt end`;
 `gmt psconvert sks_syn.ps -Mbsks.ps -Tf -Fsks_com`;
 
 
@@ -432,26 +432,22 @@ sub fabs{
 
 sub PSTEXT{
     my($xx, $yy,$textsize, $textangle, $textfont, $just, $text, $ps) = @_;
-    open(GMT,"| gmt text -R$RSCALE -F+f+a+j");
+    open(GMT,"| gmt text -R$RSCALE -N -F+f+a+j ");
         print GMT "$xx $yy $textsize,$textfont $textangle $just $text\n";
     close(GMT);
 }
 
 sub sks_tab{
    my($gcarc) = @_;
-   open(TT,"tcurve.out");
+   open(TT,"taup_curve.gmt");
    $l = <TT>; chomp($l);
    @seg = split(" ",$l);
-   for($kk=0; $kk<@seg; $kk++){
-       if($seg[$kk] =~/^SKSac$/) {$col = $kk;};
-   }
-#   print "sks at $col column\n";
    $num = 0;
    while($l=<TT>){
       chomp($l);
       @seg = split(" ",$l);
       $g[$num] = $seg[0];
-      $sks[$num] = $seg[$col];
+      $sks[$num] = $seg[1];
 #      print "$g[$num] $sks[$num]\n";
       $num ++;
    }

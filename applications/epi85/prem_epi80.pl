@@ -19,10 +19,10 @@ $plot_grt_sh = "$plotdir/Plot_GRT_sh.pl";
 
 $par    = "run.par";
 
-$GRT = 0;
-$GRT_SH = 0;
+$GRT = 1;
+$GRT_SH = 1;
 $plot_result = 1;
-$evdp = 384;
+$evdp = 152;
 $phase = "SKS";
 
 # Aniso=1: zl; other: not invoke
@@ -34,7 +34,7 @@ $read_uvw = "$plotdir/read_uvw";
 $Tosac   = "$plotdir/uvw2sac";
 $sac_plot= "$plotdir/sac_plot";
 $plot_uvw = "plot_uvw_sks.pl";
-$trace   = 45;
+$trace   = 54;
 $cal_split="/home/maoyt/work/s-sks/applications/epi80/cal_split.pl";
 
 # step 0: GRT calculations

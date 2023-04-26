@@ -5,7 +5,7 @@
 
 $DIR[0]= "/media/disk/data_disk/Rawdata/ncisp/ncisp6/events";
 
-$DIRNEW= "/home/zhl/work/s-sks/ncisp6/data/raw";
+$DIRNEW= "/home/maoyt/work/s-sks/ncisp6/data/raw";
 
 $gcarcmin = 80.;
 $gcarcmax = 120.;

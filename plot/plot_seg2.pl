@@ -108,11 +108,11 @@ for($ii = 0; $ii< @comp; $ii++){
       $t_b = $sks_t - $pre;
       $t_e = $sks_t + $after;
 
-      print "sac: $sac max_v=$max_amp[$ss] sks-t=$sks_t\n";
+      # print "sac: $sac max_v=$max_amp[$ss]  sks-t=$sks_t\n";
       $tvsr = substr($t_r_ration[$ss],0,4);
       `$read_sac $sac $t_b $t_e`;
       &creat_xy_seg($sacxy,$temp,$gcarc, $dt, $sks_t, $unit, $max_amp[$ss],$norm);
-#      print "sac: $sac gcarc=$gcarc\n";
+      print "sac: $sac gcarc=$gcarc\n";
       `gmt plot $temp -JX$SCALE -R$RSCALE -W1.2p,deepskyblue,: -N `;
       if($ii ==1) {
           &PSTEXT($XMAX+($XMAX-$XMIN)/10 ,$gcarc ,8, 0, 1, 10, "$sta[0]",$PS_file);
@@ -178,20 +178,16 @@ sub creat_xy_seg{
 
 sub sks_tab{
    my($gcarc) = @_;
-   open(TT,"tcurve.out");
+   open(TT,"taup_curve.gmt");
    $l = <TT>; chomp($l);
    @seg = split(" ",$l);
-   for($kk=0; $kk<@seg; $kk++){
-       if($seg[$kk] =~/^SKSac$/) {$col = $kk;};
-   }
-#   print "sks at $col column\n";
    $num = 0;
    while($l=<TT>){
       chomp($l);
       @seg = split(" ",$l);
       $g[$num] = $seg[0];
-      $sks[$num] = $seg[$col];
-#      print "$g[$num] $sks[$num]\n";
+      $sks[$num] = $seg[1];
+      #      print "$g[$num] $sks[$num]\n";
       $num ++;
    }
    for($kk=0; $kk<@g-1;$kk++){ 
