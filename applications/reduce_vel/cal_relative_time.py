@@ -76,7 +76,7 @@ plt.axhline(0, linewidth = 3.0, linestyle = "dashed", color = 'darkgray')
 plt.xlim((81.935,91.626))
 plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
 ax.set_xlabel("GCARC ($\circ)$",fontsize = 20)
-ax.set_ylabel("Vs Pertubation ", fontsize = 20)
+ax.set_ylabel("Vs Perturbation ", fontsize = 20)
 
 cmap = plt.cm.get_cmap('Blues')
 angle_range = [0, 90]
@@ -101,7 +101,7 @@ plt.axvspan(90.8,91.626, color = cmap(norm(20)), alpha = 0.4)
 
 plt.scatter(sta,red_vel, s=100, c='#FF8884')
 
-plt.savefig('Vs_pertubation.pdf')
+plt.savefig('Vs_perturbation.pdf')
 plt.show()
 
 
