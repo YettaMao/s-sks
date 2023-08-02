@@ -32,8 +32,8 @@ $Line   = "6/0/0/0";
 $textsize = 15;
 $textangle = 0;
 
-`gmstset MEASURE_UNIT cm`;
-`gmtset FRAME_PEN 5/255/255/255 `;   
+#`gmstset MEASURE_UNIT cm`;
+#`gmtset FRAME_PEN 5/255/255/255 `;   
 
 `gmt begin $PS_file pdf`;
 #  print "Plotting Frame\n";
@@ -83,7 +83,7 @@ $diameter2 = 6371 - $bottom;
 # receiver
 print "output receiver\n";
 &transfer_file("receiver.xy","temp");
-`gmt plot temp -N -Si0.6 -Gblue`;
+`gmt plot temp -N -Skrtriangle/0.6 -Gblue`;
 
 print "Plotting Texts\n";
 &PSTEXTFILE($Text, $PS_file);

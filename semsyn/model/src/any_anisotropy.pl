@@ -11,29 +11,24 @@ $cal = "./cjcbi0";
 $n=3; 
 $stronger = 1.3; # enlarge at 1 direction (x)
 
-#@vps =(7.30);
-#@vss =(4.34);
-#@rhos=(3.00);
+#@vps =(8.1595); #lithos 
+#@vss =(4.5174);
+#@rhos=(3.4051);
 
-#@vps =(7.80);
-#@vss =(4.50);
-#@rhos=(3.30);
+@vps =(8.1864); # asthos
+@vss =(4.5312);
+@rhos=(3.4224);
 
-#@vps =(6.90);
-#@vss =(3.96);
-#@rhos=(2.0);
-
-@vps =(8.10);
-#@vss =(4.73);
-@vss =(4.48);
-@rhos=(3.2);
+#@vps =(8.10);
+#@vss =(4.48);#maoyt
+#@rhos=(3.2);
 
 $TI = "any.ela";
 
 $rot = "/home/maoyt/work/rf/semsyn/model/src/elastic_rotate";
 $new_model = "newany.ela";
 
-$angle_100 = 175; # fast polarization direction wrt north 
+$angle_100 = 160; # fast polarization direction wrt north 
 $sem = "sem_".$angle_100;
 
 $work = ` pwd`; chomp($work);

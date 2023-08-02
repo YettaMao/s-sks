@@ -1,6 +1,6 @@
 # perl script for runing SEM programs
 
-$homedir= "/home/maoyt/work/s-sks";
+$homedir= "/home/maoyt/work/s-sks/";
 $pgsdir = "/home/maoyt/work/s-sks/semsyn";
 
 $psv    = "$pgsdir/bin/aserpsv_sem";
@@ -34,7 +34,7 @@ $read_uvw = "$plotdir/read_uvw";
 $Tosac   = "$plotdir/uvw2sac";
 $sac_plot= "$plotdir/sac_plot";
 $plot_uvw = "plot_uvw_sks.pl";
-$trace   = 60;
+$trace   = 52;
 $cal_split="/home/maoyt/work/s-sks/applications/epi83/cal_split.pl";
 
 # step 0: GRT calculations
@@ -104,7 +104,7 @@ if($plot_result == 1){
 #       `$sac_plot $trace 0 0 >> ./sem_p.txt`;
        `$sac_plot $trace >> ./sem_p.txt`;
        print "perl $plot_uvw\n >> ./sem_p.txt\n";
-         `perl $plot_uvw`;    
+       `perl $plot_uvw`;    
     }
     else{
        `$read_uvw par=$par`;
@@ -112,6 +112,7 @@ if($plot_result == 1){
     }
 }
 
+`perl plot_sks.pl`;
 #4
 print "Call cal_split.pl\n";
 #`perl $cal_split`;

@@ -8,9 +8,13 @@
 
 $plot_w = 1;
 $offset = 1;
+$draw_model = 1;
+$x_o = 9000;
+$pi = 3.14159265;
+$deg = 6371*$pi/180.;
 
 $sks_t_offset = 0;
-$draw_model = 1;
+
 $column_num = 2; 
 if($plot_w == 1) {
    @comp  = ("u.xy", "v.xy", "w.xy");
@@ -113,25 +117,27 @@ $PORT       = "-P";
 $SCALE      = "$XLEN/$YLEN";
 $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
 $FSCALE     = "-F255/255/255";
-$BSCALE = "-B${xanot}/${yanot}WSne";
+$BSCALE = "-BWSne";
 $Line = "3/80/80/250";
+$Line = "80/80/250";
 $Time_line  = "4/0/0/0t20_20:15";
 $STime_line = "4/0/0/255t20_20:15";
+$Time_line  = "0/0/0";
+$STime_line = "0/0/255";
 
 $textsize = 15;
 $textangle = 0;
 $x_offset = ($XMAX - $XMIN)/20;
 $y_offset = ($YMAX - $YMIN)/40;
 print "plotting , please wait ...\n";
-`gmtset ANNOT_FONT_SIZE_PRIMARY 10`;
-`gmtset MEASURE_UNIT cm`;
+`gmt begin Fig1 ps`;
 for($ii =0; $ii< @comp; $ii++)
 {
    if($ii==0) {
-         `psbasemap -JX$SCALE -R$RSCALE -K $PORT  -X$xshift -Y$yshift $BSCALE>$PS_file`;
+         `gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;
           &PSTEXT($XMAX + 40, $YMAX + $y_offset*2.5 ,10, 0, 1, 10, "Time (s)",$PS_file);
           &PSTEXT($XMIN - 6.5* $x_offset, $YMIN +($YMAX - $YMIN)/2,10, 90, 1, 10, "Distance (\260)",$PS_file);
-       #   &PSTEXT($XMIN - 3.5* $x_offset, $YMIN -($YMAX - $YMIN)/20,17, 0, 1, 10, "(b)",$PS_file);
+       #   &PSTEXT($XMIN - 3.5* $x_offset, $YMIN -($YMAX - $YMIN)/20,17, 0, 1, 10, "(b)",$PS_file);#maoyt comment
    }
    else 
    {  
@@ -140,29 +146,25 @@ for($ii =0; $ii< @comp; $ii++)
             $xshift = "5.3c"
        }
 
-       $BSCALE = "-B${xanot}/${yanot}wSne";
-       `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  -X$xshift -Y$yshift $BSCALE>>$PS_file`;
+       $BSCALE = "-BwSne";
+       `gmt basemap -JX$SCALE -R$RSCALE -X$xshift -Y$yshift $BSCALE -Bxa$xanot -Bya$yanot`;
    }
-
    print "Now is $title[$ii] ...\n";
 
-   `psxy $comp[$ii] -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W$Line >> $PS_file`;
+   `gmt plot $comp[$ii] -W$Line`;
    if($offset <=0) {
-       `psxy time.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$Time_line >> $PS_file`;
-       `psxy stime.of -JX$SCALE -R$RSCALE  -N -K -O $PORT -W$STime_line >> $PS_file`;
+       `gmt plot time.of -N -W$Time_line `;
+       `gmt stime.of -N  -W$STime_line`;
    }
 
    $y = $YMIN + $y_offset*0.6;
-   &PSTEXT($XMIN+($XMAX-$XMIN)/2,$y ,10, $textangle, 1, 10, $title[$ii],$PS_file);
+   &PSTEXT($XMIN+($XMAX-$XMIN)/2,$y ,9, $textangle, 1, 10, $title[$ii],$PS_file);
 
-   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT $BSCALE>>$PS_file`;
+   `gmt basemap $BSCALE`;
 }
 
-=pod
+
 # ----------------- draw models -------------------------
-$x_o = 9000;
-$pi = 2.1415926;
-$deg = 6371*$pi/180.0;
 if($draw_model == 1) {
    print "----- Plotting model -----\n";
    $XMIN = $x_o/$deg + 1.0;
@@ -170,6 +172,7 @@ if($draw_model == 1) {
    $YMIN = 0;
    $YMAX = 300;
    $velm = "vel.xy";
+   $output_vd = 0; # if output of velocity model is of the difference between (c44-c55)/(c44+c55)/2
 
    &create_model("semmodel",2,"zone1.xy",$x_o,0);
    &model_layers("semmodel",$x_o);
@@ -185,28 +188,36 @@ if($draw_model == 1) {
    $SCALE  = "$XLEN/$YLEN";
    $RSCALE = "$XMIN/$XMAX/$YMIN/$YMAX";
    $FSCALE = "-F255/255/255";
-   $BSCALE = "-B${xanot}/${yanot}WSne";
+   $BSCALE = "-BWSne";
 
    $B= $BSCALE;
    $Rslice="-R$XMIN/$XMAX/$YMIN/$YMAX";
 
    $CPT= "vel_gray.cpt";
-   $xshift = -5.8;
+   `cp ../$CPT $CPT`;
+   $xshift = -8.8;
    $yshift = 18.;
 
-   `surface $velm -Gvelm.grd -R$RSCALE -I0.01/0.1 -T0.25 -V`;
-   `grdimage velm.grd -X$xshift -Y$yshift -JX$SCALE -R$RSCALE -C$CPT  -K -O >> $PS_file`;
+    if($output_vd == 1){
+      $cmax = 0.1;
+      open(SVC,"|/home/maoyt/work/tomo/software/x/svcpt13_table_cont_zhl");
+      print SVC "-$cmax $cmax\n";
+      close(SVC);
+      `mv svel13.cpt $CPT`;
+    }
+   `gmt surface $velm -Gvelm.grd -R$RSCALE -I0.01/0.1 -T0.25 `;
+   `gmt grdimage velm.grd -X$xshift -Y$yshift -JX$SCALE -R$RSCALE -C$CPT `;
 
-#   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  $BSCALE >>$PS_file`;
-   `psxy layers.xy -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W5/200/200/200  >> $PS_file`;
+   `gmt basemap -JX$SCALE -R$RSCALE $BSCALE -Bxa$xanot -Bya$yanot`;
+   `gmt plot layers.xy -JX$SCALE -R$RSCALE -W200/200/200 `;
 
-#   `psxy $int_model -JX$SCALE -M -R$RSCALE  -N -K -O $PORT -W5/200/0/0  >> $PS_file`;
+#   `gmt plot $int_model -JX$SCALE -R$RSCALE -W200/0/0 `;
 
    &PSTEXT($XMIN -($XMAX-$XMIN)/8 , $YMIN + ($YMAX - $YMIN) /2 ,11, 90, 1, 10, "Depth (km)",$PS_file);
    &PSTEXT($XMIN+($XMAX-$XMIN)/2 ,$YMAX + ($YMAX-$YMIN)/3,11, 0, 1, 10, "Distance (\260)",$PS_file);
-   &PSTEXT($XMIN -1.3 , $YMIN - ($YMAX - $YMIN) /7 ,15, 0, 1, 10, "(a)",$PS_file);
+   #&PSTEXT($XMIN -1.3 , $YMIN - ($YMAX - $YMIN) /7 ,15, 0, 1, 10, "(a)",$PS_file);
 
-   `psxy arrow.xy -JX$SCALE -R$RSCALE  -N -K -O $PORT -SV0.1c/0.2c/0.13c -G100/100/100 >> $PS_file`;
+   #  `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100`;
 
    open(RC,"receiver.xy");
    $nl=<RC>; chomp($nl);
@@ -219,38 +230,32 @@ if($draw_model == 1) {
    }
    close(SS);
    close(RC);
+   `gmt plot sta.xy -N -Si0.15c -Gblack`;
 
-   `psxy sta.xy -JX$SCALE -R$RSCALE  -N -K -O $PORT -Si0.15 -G0/0/0 >> $PS_file`;
-#   `psxy arrow.xy -JX$SCALE -R$RSCALE  -N -K -O $PORT -SV0.1c/0.2c/0.13c -G100/100/100 >> $PS_file`;
-   `psbasemap -JX$SCALE -R$RSCALE -K -O $PORT  $BSCALE >>$PS_file`;
+#   `gmt plot arrow.xy -SV0.1c/0.2c/0.13c -G100/100/100 `;
 }
-=cut
-
+`gmt end`;
 #`gs $PS_file`;
 
 
 sub PSTEXT{
     my($xx, $yy,$textsize, $textangle, $textfont, $just, $text, $ps) = @_;
-    open(GMT,"| pstext -R$RSCALE -K -O -N -JX$SCALE >> $ps");
-        print GMT "$xx $yy $textsize $textangle $textfont $just $text\n";
+    open(GMT,"| gmt text -R$RSCALE -N -F+f+a+j ");
+        print GMT "$xx $yy $textsize,$textfont $textangle $just $text\n";
     close(GMT);
 }
 
 sub sks_tab{
    my($gcarc) = @_;
-   open(TT,"tcurve.out");
+   open(TT,"taup_curve.gmt");
    $l = <TT>; chomp($l);
    @seg = split(" ",$l);
-   for($kk=0; $kk<@seg; $kk++){
-       if($seg[$kk] =~/^SKSac$/) {$col = $kk;};
-   }
-#   print "sks at $col column\n";
    $num = 0;
    while($l=<TT>){
       chomp($l);
       @seg = split(" ",$l);
       $g[$num] = $seg[0];
-      $sks[$num] = $seg[$col];
+      $sks[$num] = $seg[1];
 #      print "$g[$num] $sks[$num]\n";
       $num ++;
    }
@@ -265,19 +270,15 @@ sub sks_tab{
 
 sub S_tab{
    my($gcarc) = @_;
-   open(TT,"tcurve.out");
+   open(TT,"taup_curve_S.gmt");
    $l = <TT>; chomp($l);
    @seg = split(" ",$l);
-   for($kk=0; $kk<@seg; $kk++){
-       if($seg[$kk] =~/^S$/) {$col = $kk;};
-   }
-#   print "sks at $col column\n";
    $num = 0;
    while($l=<TT>){
       chomp($l);
       @seg = split(" ",$l);
       $g[$num] = $seg[0];
-      $sks[$num] = $seg[$col];
+      $sks[$num] = $seg[1];
 #      print "$g[$num] $sks[$num]\n";
       $num ++;
    }
@@ -289,3 +290,135 @@ sub S_tab{
    close(TT);
    return $time;
 }
+
+sub create_model{
+   my($fd_file,$layer,$an_file1,$x_o,$layn) = @_;
+   #$layer: the structural layer number 
+   $back = 1200;
+   open(FF, "$fd_file");
+   $l = <FF>; chomp($l);
+   $l_num = $l;
+   $lay = $layn + 1;
+   $xstart = 0;
+   $xstep = 10;
+
+
+   open(AN,">$an_file1");
+   print AN ">\n";
+
+   for($ll=0;$ll<$l_num;$ll++){ 
+      $l  = <FF>; chomp($l);
+      $an = <FF>; chomp($an);
+      $bn = <FF>; chomp($bn);
+      
+      if($ll == ($l_num -$lay-1)) {
+         undef(@an_segs);
+         undef(@bn_segs);
+         @an_segs= split(/ +/,$an);
+         @bn_segs= split(/ +/,$bn);
+         $pp = @an_segs; $temp = $an_segs[$pp-2];
+         print "line =$ll pp=$pp temp=$temp \n";         
+         for($li=0;$li<@an_segs-1;$li++){
+            if($an_segs[$li] <= $back){
+                $lx = ($an_segs[$li]+$x_o)/111.2;
+                $ly = $top - $bn_segs[$li];
+                print AN "$lx $ly\n";
+                if($li==0) {$lx0=$lx; $ly0=$ly;}
+            }
+         }
+
+        $mmm = 0;
+        $xxx = $xstart;
+        while($xxx < $an_segs[$pp-2]){
+            $tx[$mmm] = $xxx;
+            for($li=0;$li<@an_segs-2;$li++){
+               if($xxx>=$an_segs[$li] && $xxx<$an_segs[$li+1]){
+                    $slope = ($bn_segs[$li+1]-$bn_segs[$li])/($an_segs[$li+1]-$an_segs[$li]);
+                    $ty[$mmm] = $bn_segs[$li] + $slope*($xxx-$an_segs[$li]);
+               }
+            }
+#            print "$mmm $xxx $ty[$mmm]\n";
+            $mmm ++;
+            $xxx = $xxx + $xstep;
+
+        }
+      }
+
+      if($ll == ($l_num-$lay)) {
+         print "last line =$lay\n";
+         @stiffs = split(/ +/,$l);
+         $rho = $stiffs[14];
+         $vp = sqrt($stiffs[1]/$rho);
+         $vs = sqrt($stiffs[10]/$rho);
+
+         undef(@an_segs);
+         undef(@bn_segs);
+
+         @an_segs= split(/ +/,$an);
+         @bn_segs= split(/ +/,$bn);
+         
+         for($li=0;$li<@an_segs;$li++){
+            $point = @an_segs - 2 - $li;
+            $lx = ($an_segs[$point]+$x_o)/$deg;
+            $ly = $top - $bn_segs[$point];
+            if($an_segs[$point] <= $back) { print AN "$lx $ly\n";}
+         }
+
+        for($kk=0;$kk<$mmm;$kk++){
+            $xxx = $tx[$kk];
+            for($li=0;$li<@an_segs-2;$li++){
+               if($xxx>=$an_segs[$li] && $xxx<$an_segs[$li+1]){
+                    $slope = ($bn_segs[$li+1]-$bn_segs[$li])/($an_segs[$li+1]-$an_segs[$li]);
+                    $ty2[$kk] = $bn_segs[$li] + $slope*($xxx-$an_segs[$li]);
+               }
+            }
+        }
+         print AN "$lx0 $ly0\n";
+         close(AN);
+      }
+
+   } 
+   print AN "$lx0 $ly0\n";
+   close(FF);
+   close(AN);
+   print "calculate offset vp=$vp vs=$vs\n";
+   open(SLO,">offset");
+   for($kk=0;$kk<$mmm;$kk++){
+       $xxx = ($tx[$kk] + $x_o)/$deg;
+       $time = ($ty2[$kk]-$ty[$kk])*(-1./$vp + 1./$vs);
+       print SLO "$time $xxx \n";
+#       print "$kk x=$tx[$kk] y=$ty[$kk] y1=$ty2[$kk] $xxx $time\n";
+   }
+   close(SLO);
+}
+
+sub model_layers{
+   my($fd_file,$x_o) = @_;
+   #$layer: the structural layer number 
+   open(FF, "$fd_file");
+   $l = <FF>; chomp($l);
+   $l_num = $l;
+
+   open(AN,">layers.xy");
+   for($ll=0;$ll<$l_num;$ll++){
+#   for($ll=$l_num-6;$ll<$l_num;$ll++){  
+      $l  = <FF>; chomp($l);
+      $an = <FF>; chomp($an);
+      $bn = <FF>; chomp($bn);
+      undef(@an_segs);
+      undef(@bn_segs);
+
+      @an_segs= split(/ +/,$an);
+      @bn_segs= split(/ +/,$bn);
+      print AN ">\n";
+      for($npp=0;$npp<@an_segs;$npp++){
+          $ax = ($an_segs[$npp]+$x_o)/$deg;
+          $bx = $top - $bn_segs[$npp];
+          print AN "$ax $bx\n";
+      }  
+   } 
+   close(FF);
+   close(AN);
+}
+
+

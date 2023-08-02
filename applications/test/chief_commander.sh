@@ -5,5 +5,5 @@ for ani in {0..180..15}; do
 	#echo "deprf_${ani}"
 	perl reverse.pl
 	perl prem_epi83.pl
-	cp sks_syn.pdf "sys_syn_${ani}.pdf"
+	cp Fig1.ps "Fig_${ani}.pdf"
 done

@@ -13,8 +13,8 @@ do
     cd $homedir/raw/$file
 
     sac << EOF
-    r NE060.01.1*sac
-    lh baz 
+    r NE030.01.1*sac
+    lh gcarc 
     q
 EOF
 done

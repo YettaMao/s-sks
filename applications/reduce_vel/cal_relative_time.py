@@ -8,14 +8,23 @@ from matplotlib.ticker import PercentFormatter
 from math import *
 import sys
 
-syn_file = 'epi83/u.xy'
+#syn_file = 'epi83/u.xy'
+#obs_file = '../ncisp6/data/raw/2007_289_21_05_41/obs_r.xy'
+#sta_file = 'epi83/sta.xy'
+#thres_syn = 0.003
+#thres_obs = 0.0015
+#prem_iaspi = 2.3
+#vel = 4.48
+#h = 50
+
+syn_file = 'epi83_aths/u.xy'
 obs_file = '../ncisp6/data/raw/2007_289_21_05_41/obs_r.xy'
-sta_file = 'epi83/sta.xy'
+sta_file = 'epi83_aths/sta.xy'
 thres_syn = 0.003
 thres_obs = 0.0015
 prem_iaspi = 2.3
-vel = 4.48
-h = 50
+vel = 4.53
+h = 70
 
 def calculate_arrival_time(data,threshold):
     data= np.array(data)
@@ -101,7 +110,7 @@ plt.axvspan(90.8,91.626, color = cmap(norm(20)), alpha = 0.4)
 
 plt.scatter(sta,red_vel, s=100, c='#FF8884')
 
-plt.savefig('Vs_perturbation.pdf')
+plt.savefig('Vs_perturbation_athos.pdf')
 plt.show()
 
 

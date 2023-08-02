@@ -112,6 +112,7 @@ for($ii = 0; $ii< @comp; $ii++){
       $tvsr = substr($t_r_ration[$ss],0,4);
       `$read_sac $sac $t_b $t_e`;
       &creat_xy_seg($sacxy,$temp,$gcarc, $dt, $sks_t, $unit, $max_amp[$ss],$norm);
+
       print "sac: $sac gcarc=$gcarc\n";
       `gmt plot $temp -JX$SCALE -R$RSCALE -W1.2p,deepskyblue,: -N `;
       if($ii ==1) {
@@ -174,6 +175,14 @@ sub creat_xy_seg{
       printf XY ("%-8.3f %-12.6e\n",$n_t[$tt], $amp);
    }
    close(XY);
+   open(MYT, ">>obs_t.xy");
+   print MYT ">>\n";
+   for($tt=0; $tt < $num; $tt++){
+      if($norm ==0) {$amp = -$n_amp[$tt]*$unit/$max_amp + $gcarc;}
+      else {$amp = -$n_amp[$tt]*$unit/$its_max + $gcarc;}
+      printf MYT ("%-8.3f %-12.6e\n",$n_t[$tt], $amp);
+   }
+   close(MYT);
 }
 
 sub sks_tab{

@@ -9,7 +9,7 @@ $semrf = "semmodel";
 $deprf = "deprf";
 $hshift = 0; # unit in km
 
-$forward = 0; # 1: from semrf - > depthrf, 0: from deprf->semrf
+$forward = 0; # from semrf - > depthrf
 
 if($forward ==1) {&forward_transform($semrf,$deprf);}
 if($forward ==0) {&backward_transform($semrf,$deprf);}
@@ -59,14 +59,7 @@ sub backward_transform{
    print DEP "$l\n";
    for($ll=0;$ll<$l_num;$ll++){ 
       $l  = <FF>; chomp($l);
-      @segs=split(/ +/,$l);
-      $npts = $segs[0];
-
-      print DEP "$npts  ";
-      for($kk=1;$kk<15;$kk++){
-          printf DEP ("%-9.4f ",$segs[$kk])
-      }
-      print DEP "\n";
+      print DEP "$l\n";
       $an = <FF>; chomp($an);
       $bn = <FF>; chomp($bn);
       undef(@an_segs);

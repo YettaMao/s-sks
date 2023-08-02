@@ -74,6 +74,7 @@ sub backward_transform{
 
       @an_segs= split(/ +/,$an);
       @bn_segs= split(/ +/,$bn);
+      if($npts != @an_segs) {print "No.$ll ERROR: inconsistent point number !!!!!!!!!!! \n";}
       for($npp=0;$npp<@an_segs;$npp++){
           $ax = $an_segs[$npp]*$deg - $x_o + $hshift;
           printf DEP ("%-11.4f ",$ax);

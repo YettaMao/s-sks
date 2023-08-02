@@ -2,7 +2,7 @@
 
 $xyfile = "receiver.txt"; # using in x-z coordinate system
 $poisition= "receiver_long_lat";
-$x_o= 9000; # unit: km, being consistent with that in run.par
+$x_o= 5500; # unit: km, being consistent with that in run.par
 $pi = 3.1415926536;
 $deg_2_dis = 6371*$pi/180;
 
